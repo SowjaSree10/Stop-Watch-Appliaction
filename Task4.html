@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>To-Do Web App</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
+}
+
+body{
+    background:linear-gradient(135deg,#667eea,#764ba2);
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+}
+
+.container{
+    background:#fff;
+    width:100%;
+    max-width:600px;
+    padding:25px;
+    border-radius:15px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.2);
+}
+
+h1{
+    text-align:center;
+    margin-bottom:20px;
+    color:#333;
+}
+
+.input-group{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+input{
+    padding:12px;
+    border:1px solid #ccc;
+    border-radius:8px;
+    font-size:16px;
+}
+
+button{
+    padding:10px 15px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:14px;
+}
+
+.add-btn{
+    background:#28a745;
+    color:white;
+}
+
+.task-list{
+    margin-top:20px;
+}
+
+.task{
+    background:#f8f9fa;
+    padding:15px;
+    margin-bottom:10px;
+    border-radius:10px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+}
+
+.task-info{
+    flex:1;
+}
+
+.completed{
+    text-decoration:line-through;
+    color:gray;
+}
+
+.task-actions{
+    display:flex;
+    gap:5px;
+    margin-top:10px;
+}
+
+.complete-btn{
+    background:#007bff;
+    color:white;
+}
+
+.edit-btn{
+    background:#ffc107;
+}
+
+.delete-btn{
+    background:#dc3545;
+    color:white;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>To-Do List</h1>
+
+    <div class="input-group">
+        <input type="text" id="taskInput" placeholder="Enter Task">
+        <input type="datetime-local" id="taskDate">
+        <button class="add-btn" onclick="addTask()">Add Task</button>
+    </div>
+
+    <div id="taskList" class="task-list"></div>
+</div>
+
+<script>
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+function saveTasks() {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+}
+
+function renderTasks() {
+    const taskList = document.getElementById("taskList");
+    taskList.innerHTML = "";
+
+    tasks.forEach((task, index) => {
+        const taskDiv = document.createElement("div");
+        taskDiv.className = "task";
+
+        taskDiv.innerHTML = `
+            <div class="task-info">
+                <h3 class="${task.completed ? 'completed' : ''}">
+                    ${task.text}
+                </h3>
+                <small>${task.date || "No Date & Time Set"}</small>
+            </div>
+
+            <div class="task-actions">
+                <button class="complete-btn" onclick="toggleComplete(${index})">
+                    ${task.completed ? "Undo" : "Complete"}
+                </button>
+
+                <button class="edit-btn" onclick="editTask(${index})">
+                    Edit
+                </button>
+
+                <button class="delete-btn" onclick="deleteTask(${index})">
+                    Delete
+                </button>
+            </div>
+        `;
+
+        taskList.appendChild(taskDiv);
+    });
+}
+
+function addTask() {
+    const taskInput = document.getElementById("taskInput");
+    const taskDate = document.getElementById("taskDate");
+
+    const text = taskInput.value.trim();
+
+    if(text === "") {
+        alert("Please enter a task.");
+        return;
+    }
+
+    tasks.push({
+        text: text,
+        date: taskDate.value,
+        completed: false
+    });
+
+    saveTasks();
+    renderTasks();
+
+    taskInput.value = "";
+    taskDate.value = "";
+}
+
+function toggleComplete(index) {
+    tasks[index].completed = !tasks[index].completed;
+    saveTasks();
+    renderTasks();
+}
+
+function editTask(index) {
+    let updated = prompt("Edit Task:", tasks[index].text);
+
+    if(updated !== null && updated.trim() !== "") {
+        tasks[index].text = updated.trim();
+        saveTasks();
+        renderTasks();
+    }
+}
+
+function deleteTask(index) {
+    if(confirm("Delete this task?")) {
+        tasks.splice(index, 1);
+        saveTasks();
+        renderTasks();
+    }
+}
+
+renderTasks();
+</script>
+
+</body>
+</html>
